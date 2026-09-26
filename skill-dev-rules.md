@@ -1,6 +1,6 @@
 # Skill 开发铁律
 
-版本：v1.0，2026-09-25
+版本：v1.1，2026-09-26
 适用：所有基于 Claude Code / Agent Skills 的 skill、插件、子代理的开发与二次开发
 正本：本文件。各项目的开发计划只引用条目编号，并补充项目自己的具体值（见末尾"项目落地表"），不复制全文。
 
@@ -8,7 +8,7 @@
 
 2026-09-25 之前，claude-blog 二次开发一次改了十几个功能，结果出问题时查不出在哪，只能整体回滚。回滚后总结出这些规则，并用 Anthropic 官方规范和工程文章逐条核对。规则只有 12 条，分三组，按开发的三个时刻使用：动手之前、写说明书时、验收时。
 
-来源标注：〔官方规范〕= Claude Platform《Skill authoring best practices》；〔Anthropic 文章〕= 《Building effective agents》《Effective context engineering for AI agents》《How we built our multi-agent research system》；〔实践〕= 自己踩坑总结。
+来源标注：〔官方规范〕= Claude Platform《Skill authoring best practices》；〔Anthropic 文章〕= 《Building effective agents》《Effective context engineering for AI agents》《How we built our multi-agent research system》《Improving skill-creator》；〔superpowers〕= obra/superpowers 的 writing-skills；〔Red Hat〕= 《Building skills for AI agents: pitfalls and best practices》；〔实践〕= 自己踩坑总结。
 
 ---
 
@@ -36,6 +36,8 @@
 | C 碰最终产物 | 改变最终交付物的规则、子代理、写手 | 跑完整流程 | 要，和最近一次 C 级基线对比 |
 
 基线只在 B、C 级第一次改之前跑一次原版存下来，之后同级改动都拿它比，不每次重跑原版。
+
+通过标准先写后改：改之前先把通过标准写成能打勾的清单，改的过程中不随手追加；真要追加，说明是新发现，单独记下。B、C 级先确认原版确实达不到标准（先看到失败），再动手改。〔官方规范"先建评测，再写最少的说明"；superpowers"没有先失败的测试，就不写 skill"〕
 
 ### 3. 先用最简单的做法，不够再加 〔Anthropic 文章原话：先找最简单的方案，只在需要时增加复杂度〕
 
@@ -69,6 +71,8 @@ SKILL.md 正文不超 500 行。细节放参考文件，SKILL.md 直接指向它
 
 每一步的验收写成能打勾的话：文件在不在、有没有某一节、是否标了来源。能用脚本查的（文件存在、行数、格式）就写成脚本，让模型自己跑完再往下走。
 
+机械步骤（复制、拼接、改名、格式转换）也交给脚本或命令，不让模型凭记忆重写一遍；模型只做需要判断的部分。〔官方规范"脚本要自己把问题解决，不推给模型"；Red Hat"机械活用脚本，判断活用模型"〕
+
 ### 9. 产物落盘，不靠转述 〔Anthropic 文章"子代理把结果写进文件系统，避免传话游戏"、"计划先存进记忆再执行"〕
 
 子代理的结果必须写成文件，回传的是路径，不是摘要。主流程的状态也写文件。中断能续跑，出错能查到是哪一步。
@@ -83,11 +87,13 @@ SKILL.md 正文不超 500 行。细节放参考文件，SKILL.md 直接指向它
 
 ### 11. 一次只改一个小功能 〔实践〕
 
-一个功能一个分支，测完确认再合并，不同时开两个分支。改完列出"改了哪个文件、第几行、原来写什么、现在写什么"。
+一个功能一个分支，测完确认再合并，不同时开两个分支。改完列出"改了哪个文件、第几行、原来写什么、现在写什么"，并追加进改动日志（日期、文件行号、原来/现在、为什么、谁定的），以后能回溯。〔Red Hat"把 skill 当软件管：有版本、能审查"〕
 
-### 12. 验收样本固定 〔实践〕
+### 12. 验收样本和环境都固定 〔实践；Anthropic 文章《Improving skill-creator》"每次测评在干净环境里跑，避免互相污染"〕
 
 需要跑命令验收时，固定用同一个输入样本，前后才可比。样本换了，对比就失效。
+
+验收在干净的测试目录里跑：只放运行必需的文件，不放计划、日志、笔记、验收标准。模型读到"要查什么"，测试就不是盲测了。
 
 ---
 
@@ -110,7 +116,9 @@ SKILL.md 正文不超 500 行。细节放参考文件，SKILL.md 直接指向它
 | 第 2 条 "完整流程" | 例：`/blog write` |
 | 第 2 条 基线存放位置 | 例：`runs/<日期>-baseline/` |
 | 第 6 条 行数上限 | 官方建议 500；项目 CI 若有更严的，以 CI 为准 |
+| 第 11 条 改动日志位置 | 例：`docs/改动日志.md` |
 | 第 12 条 固定样本 | 例：关键词 `easy costumes with normal clothes guys` |
+| 第 12 条 干净测试目录 | 例：一个只放运行必需文件的独立目录 |
 | 裁定登记表位置 | 例：`docs/KAI-DECISIONS.md`，K 编号 |
 
 ## 出处
@@ -120,7 +128,11 @@ SKILL.md 正文不超 500 行。细节放参考文件，SKILL.md 直接指向它
 - Anthropic《Effective context engineering for AI agents》 https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents
 - Anthropic《How we built our multi-agent research system》 https://www.anthropic.com/engineering/multi-agent-research-system
 - Claude Code 文档《Skills》 https://code.claude.com/docs/en/skills
+- Anthropic《Improving skill-creator: Test, measure, and refine Agent Skills》 https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills
+- obra/superpowers《writing-skills》 https://github.com/obra/superpowers/blob/main/skills/writing-skills/SKILL.md
+- Red Hat《Building skills for AI agents: pitfalls and best practices》 https://next.redhat.com/2026/07/28/building-skills-for-ai-agents-pitfalls-and-best-practices/
 
 ## 修订记录
 
 - v1.0 2026-09-25：首版，12 条，从 claude-blog 二次开发回滚后总结。
+- v1.1 2026-09-26：第 1 条删掉"留输入槽"选项；参考官方检查清单、superpowers、skill-creator、Red Hat，补 4 处：第 2 条通过标准先写后改、先看到失败；第 8 条机械步骤交给脚本；第 11 条追加改动日志；第 12 条环境也固定（干净测试目录）。条数不变。
