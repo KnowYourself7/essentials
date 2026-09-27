@@ -1,18 +1,18 @@
 # Skill 开发铁律
 
-版本：v1.1，2026-09-26
+版本：v1.2，2026-09-27
 适用：所有基于 Claude Code / Agent Skills 的 skill、插件、子代理的开发与二次开发
 正本：本文件。各项目的开发计划只引用条目编号，并补充项目自己的具体值（见末尾"项目落地表"），不复制全文。
 
 ## 为什么有这份文件
 
-2026-09-25 之前，claude-blog 二次开发一次改了十几个功能，结果出问题时查不出在哪，只能整体回滚。回滚后总结出这些规则，并用 Anthropic 官方规范和工程文章逐条核对。规则只有 12 条，分三组，按开发的三个时刻使用：动手之前、写说明书时、验收时。
+2026-09-25 之前，claude-blog 二次开发一次改了十几个功能，结果出问题时查不出在哪，只能整体回滚。回滚后总结出这些规则，并用 Anthropic 官方规范和工程文章逐条核对。规则共 13 条，分三组，按开发的三个时刻使用：动手之前、写说明书时、验收时。第 13 条是后补的，归在"动手之前"，编号不重排，免得各项目计划里引用的条目号错位。
 
-来源标注：〔官方规范〕= Claude Platform《Skill authoring best practices》；〔Anthropic 文章〕= 《Building effective agents》《Effective context engineering for AI agents》《How we built our multi-agent research system》《Improving skill-creator》；〔superpowers〕= obra/superpowers 的 writing-skills；〔Red Hat〕= 《Building skills for AI agents: pitfalls and best practices》；〔实践〕= 自己踩坑总结。
+来源标注：〔官方规范〕= Claude Platform《Skill authoring best practices》；〔Anthropic 文章〕= 《Building effective agents》《Effective context engineering for AI agents》《How we built our multi-agent research system》《Improving skill-creator》；〔superpowers〕= obra/superpowers 的 writing-skills；〔Red Hat〕= 《Building skills for AI agents: pitfalls and best practices》；〔业界文章〕= MindStudio《What Is the Agent Handoff Pattern?》、TianPan《The Output Coupling Trap》；〔实践〕= 自己踩坑总结。
 
 ---
 
-## 一、动手之前（每次开工先过这三条）
+## 一、动手之前（每次开工先过第 1 到 3 条和第 13 条）
 
 ### 1. 依赖三问，先答再改 〔实践；呼应 Anthropic 文章"派子代理前先写清目标、输出格式、工具、边界"〕
 
@@ -42,6 +42,17 @@
 ### 3. 先用最简单的做法，不够再加 〔Anthropic 文章原话：先找最简单的方案，只在需要时增加复杂度〕
 
 能用一段说明书解决的，不派子代理；能顺序跑的，不并行；能一个命令的，不加开关；能一个文件的，不拆两个。每次想加东西先问"不加会怎样"。
+
+### 13. 产物按下游的需要来设计 〔Anthropic 文章"每个子代理都需要目标、输出格式、工具和边界"、prompt chaining"每一步处理上一步的输出"；官方规范"可校验的中间产物"；业界文章"交接模式：输出按下游的消费方式来组织，格式在写说明书之前定"〕
+
+第 1 条问的是"它吐什么"，这一条管"吐成什么样"。写一步的产物之前，先看下一步（和再往后的步骤）要从它拿什么，按那个需要定字段和格式：
+
+- 下一步要用的东西，这一步给全，而且保留原样（用户原话、原始数值、来源、0 和空值分开）。
+- 下一步负责的判断和加工（聚类、加总、挑代表），这一步不提前做，免得做两遍，或者做成另一种口径。
+- 格式固定到脚本能读（一行一条、列名固定），交接处能用脚本校验。
+
+下一步还没开发时，先读它的计划，写出"它要从这一步拿什么"，放进这一步的通过标准。
+反例：关键词调研按"主词 / 次要词 / 长尾"分类，这是给写作塞词用的；下一步需求面要的是完整词池、每个词各自的搜索量和核心词、用户原话，好按问题聚类。按写作的口径分好类，需求面用不上，还得重做。
 
 ---
 
@@ -101,7 +112,7 @@ SKILL.md 正文不超 500 行。细节放参考文件，SKILL.md 直接指向它
 
 不用一次记全。
 
-- 开工前只看第 1 到 3 条。
+- 开工前只看第 1 到 3 条和第 13 条。
 - 改文件时看第 4 到 7 条。
 - 验收时看第 8 到 10 条。
 - 第 11、12 条是底线，随时适用。
@@ -119,6 +130,7 @@ SKILL.md 正文不超 500 行。细节放参考文件，SKILL.md 直接指向它
 | 第 11 条 改动日志位置 | 例：`docs/改动日志.md` |
 | 第 12 条 固定样本 | 例：关键词 `easy costumes with normal clothes guys` |
 | 第 12 条 干净测试目录 | 例：一个只放运行必需文件的独立目录 |
+| 第 13 条 各步交接 | 例：每步的产物文件名、下一步从中取哪些字段 |
 | 裁定登记表位置 | 例：`docs/KAI-DECISIONS.md`，K 编号 |
 
 ## 出处
@@ -129,6 +141,8 @@ SKILL.md 正文不超 500 行。细节放参考文件，SKILL.md 直接指向它
 - Anthropic《How we built our multi-agent research system》 https://www.anthropic.com/engineering/multi-agent-research-system
 - Claude Code 文档《Skills》 https://code.claude.com/docs/en/skills
 - Anthropic《Improving skill-creator: Test, measure, and refine Agent Skills》 https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills
+- MindStudio《What Is the Agent Handoff Pattern? How to Design AI Outputs for Downstream Use》 https://www.mindstudio.ai/blog/what-is-agent-handoff-pattern
+- TianPan《The Output Coupling Trap: Why Multi-Agent Systems Fail Silently at Interface Boundaries》 https://tianpan.co/blog/2026/05/04/output-coupling-trap-multi-agent-systems
 - obra/superpowers《writing-skills》 https://github.com/obra/superpowers/blob/main/skills/writing-skills/SKILL.md
 - Red Hat《Building skills for AI agents: pitfalls and best practices》 https://next.redhat.com/2026/07/28/building-skills-for-ai-agents-pitfalls-and-best-practices/
 
@@ -136,3 +150,4 @@ SKILL.md 正文不超 500 行。细节放参考文件，SKILL.md 直接指向它
 
 - v1.0 2026-09-25：首版，12 条，从 claude-blog 二次开发回滚后总结。
 - v1.1 2026-09-26：第 1 条删掉"留输入槽"选项；参考官方检查清单、superpowers、skill-creator、Red Hat，补 4 处：第 2 条通过标准先写后改、先看到失败；第 8 条机械步骤交给脚本；第 11 条追加改动日志；第 12 条环境也固定（干净测试目录）。条数不变。
+- v1.2 2026-09-27：加第 13 条"产物按下游的需要来设计"（归"动手之前"，编号不重排）。起因：claude-blog 2-2 关键词调研按写作口径分类，没照顾下一步需求面要的输入。联网核对 Anthropic《How we built our multi-agent research system》《Building effective agents》、官方规范"可校验的中间产物"、MindStudio 交接模式、TianPan 输出耦合，方向一致。
