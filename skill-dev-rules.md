@@ -1,6 +1,6 @@
 # Skill 开发铁律
 
-版本：v1.2，2026-09-27
+版本：v1.3，2026-10-11
 适用：所有基于 Claude Code / Agent Skills 的 skill、插件、子代理的开发与二次开发
 正本：本文件。各项目的开发计划只引用条目编号，并补充项目自己的具体值（见末尾"项目落地表"），不复制全文。
 
@@ -96,9 +96,11 @@ SKILL.md 正文不超 500 行。细节放参考文件，SKILL.md 直接指向它
 
 ## 四、贯穿始终
 
-### 11. 一次只改一个小功能 〔实践〕
+### 11. 一次只改一个小功能，讨论设计时就开分支 〔实践；GitHub Flow〕
 
-一个功能一个分支，测完确认再合并，不同时开两个分支。改完列出"改了哪个文件、第几行、原来写什么、现在写什么"，并追加进改动日志（日期、文件行号、原来/现在、为什么、谁定的），以后能回溯。〔Red Hat"把 skill 当软件管：有版本、能审查"〕
+一个功能一个分支：一开始讨论某个功能，就开 `feat/<编号>-<名字>` 分支；规格、代码、验收记录都提交在这个分支上，测完、确认后一起合并进 main，合并后删掉分支。不属于某个功能的零碎文档（路线图调整、改动日志整理、规则更新），开一个短的 `docs/<名字>` 分支，改完就合并。同一时间只做一个功能分支。这样 main 上只有做完、验收过的东西，不会出现"计划了但没做"的规格。〔GitHub 文档《GitHub flow》：动手改之前先开分支，"改动在合并之前不会进入默认分支"；合并后删除分支；分支名简短、能看出在做什么。"main 上只留做完的东西"是由这几条推出的，原文没有逐字这么写〕
+
+改完列出"改了哪个文件、第几行、原来写什么、现在写什么"，并追加进改动日志（日期、文件行号、原来/现在、为什么、谁定的），以后能回溯。〔Red Hat"把 skill 当软件管：有版本、能审查"〕
 
 ### 12. 验收样本和环境都固定 〔实践；Anthropic 文章《Improving skill-creator》"每次测评在干净环境里跑，避免互相污染"〕
 
@@ -112,7 +114,7 @@ SKILL.md 正文不超 500 行。细节放参考文件，SKILL.md 直接指向它
 
 不用一次记全。
 
-- 开工前只看第 1 到 3 条和第 13 条。
+- 开工第一件事是开分支（第 11 条），然后看第 1 到 3 条和第 13 条。
 - 改文件时看第 4 到 7 条。
 - 验收时看第 8 到 10 条。
 - 第 11、12 条是底线，随时适用。
@@ -127,6 +129,7 @@ SKILL.md 正文不超 500 行。细节放参考文件，SKILL.md 直接指向它
 | 第 2 条 "完整流程" | 例：`/blog write` |
 | 第 2 条 基线存放位置 | 例：`runs/<日期>-baseline/` |
 | 第 6 条 行数上限 | 官方建议 500；项目 CI 若有更严的，以 CI 为准 |
+| 第 11 条 分支命名 | 例：功能 `feat/a01-scope`，零碎文档 `docs/roadmap-cleanup` |
 | 第 11 条 改动日志位置 | 例：`docs/改动日志.md` |
 | 第 12 条 固定样本 | 例：关键词 `easy costumes with normal clothes guys` |
 | 第 12 条 干净测试目录 | 例：一个只放运行必需文件的独立目录 |
@@ -145,9 +148,11 @@ SKILL.md 正文不超 500 行。细节放参考文件，SKILL.md 直接指向它
 - TianPan《The Output Coupling Trap: Why Multi-Agent Systems Fail Silently at Interface Boundaries》 https://tianpan.co/blog/2026/05/04/output-coupling-trap-multi-agent-systems
 - obra/superpowers《writing-skills》 https://github.com/obra/superpowers/blob/main/skills/writing-skills/SKILL.md
 - Red Hat《Building skills for AI agents: pitfalls and best practices》 https://next.redhat.com/2026/07/28/building-skills-for-ai-agents-pitfalls-and-best-practices/
+- GitHub 文档《GitHub flow》 https://docs.github.com/en/get-started/using-github/github-flow
 
 ## 修订记录
 
 - v1.0 2026-09-25：首版，12 条，从 claude-blog 二次开发回滚后总结。
 - v1.1 2026-09-26：第 1 条删掉"留输入槽"选项；参考官方检查清单、superpowers、skill-creator、Red Hat，补 4 处：第 2 条通过标准先写后改、先看到失败；第 8 条机械步骤交给脚本；第 11 条追加改动日志；第 12 条环境也固定（干净测试目录）。条数不变。
 - v1.2 2026-09-27：加第 13 条"产物按下游的需要来设计"（归"动手之前"，编号不重排）。起因：claude-blog 2-2 关键词调研按写作口径分类，没照顾下一步需求面要的输入。联网核对 Anthropic《How we built our multi-agent research system》《Building effective agents》、官方规范"可校验的中间产物"、MindStudio 交接模式、TianPan 输出耦合，方向一致。
+- v1.3 2026-10-11：第 11 条补"讨论设计时就开分支"：一个功能从讨论开始就在 `feat/` 分支上，规格、代码、验收记录一起合并；零碎文档走短的 `docs/` 分支；合并后删分支。条数不变。起因：claude-blog 的规格在讨论阶段就提交到 main，main 上出现"计划了但没做"的规格（a01、a08）。联网核对 GitHub 文档《GitHub flow》，方向一致。
