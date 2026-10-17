@@ -1,18 +1,18 @@
 # Skill 开发铁律
 
-版本：v1.5，2026-10-15
+版本：v1.6，2026-10-17
 适用：所有基于 Claude Code / Agent Skills 的 skill、插件、子代理的开发与二次开发
 正本：本文件。各项目的开发计划只引用条目编号，并补充项目自己的具体值（见末尾"项目落地表"），不复制全文。
 
 ## 为什么有这份文件
 
-2026-09-25 之前，claude-blog 二次开发一次改了十几个功能，结果出问题时查不出在哪，只能整体回滚。回滚后总结出这些规则，并用 Anthropic 官方规范和工程文章逐条核对。规则共 14 条，分三组，按开发的三个时刻使用：动手之前、写说明书时、验收时。第 13、14 条是后补的，归在"动手之前"，编号不重排，免得各项目计划里引用的条目号错位。
+2026-09-25 之前，claude-blog 二次开发一次改了十几个功能，结果出问题时查不出在哪，只能整体回滚。回滚后总结出这些规则，并用 Anthropic 官方规范和工程文章逐条核对。规则共 15 条，分三组，按开发的三个时刻使用：动手之前、写说明书时、验收时。第 13 到 15 条是后补的，归在"动手之前"，编号不重排，免得各项目计划里引用的条目号错位。
 
 来源标注：〔官方规范〕= Claude Platform《Skill authoring best practices》；〔Anthropic 文章〕= 《Building effective agents》《Effective context engineering for AI agents》《How we built our multi-agent research system》《Improving skill-creator》；〔superpowers〕= obra/superpowers 的 writing-skills；〔Red Hat〕= 《Building skills for AI agents: pitfalls and best practices》；〔业界文章〕= MindStudio《What Is the Agent Handoff Pattern?》、TianPan《The Output Coupling Trap》；〔实践〕= 自己踩坑总结。
 
 ---
 
-## 一、动手之前（每次开工先过第 1 到 3 条和第 13、14 条）
+## 一、动手之前（每次开工先过第 1 到 3 条和第 13 到 15 条）
 
 ### 1. 依赖三问，先答再改 〔实践；呼应 Anthropic 文章"派子代理前先写清目标、输出格式、工具、边界"〕
 
@@ -66,6 +66,11 @@
 6. 最简（第 3 条）：能删的删。
 
 自检的收获是递减的：认真核一遍能抓住大部分"想漏了"的问题，剩下的只有实跑验收才能发现，所以不靠反复自检，靠验收。
+
+### 15. 改 skill 先查信息源 〔实践；官方规范"先建评测再写文档"同一精神；Kai 2026-10-17 要求〕
+
+每次改 skill、子代理、插件的任何文件，动手前按 `skill-dev-sources.md` 的"改动类型对应查哪里"表挑 1 到 2 个来源，用 WebFetch 读对应章节的原文，不凭记忆。对照结果分三类：符合；不符就改；规范没写就标"本项目设计"。回答里只写一行对照结果，细节进改动日志或功能规格。交付前再按 S7 的检查清单过一遍。
+不这么做的后果：Claude Code 的字段和行为更新快，凭记忆会用到过期或不存在的字段（例：`allowed-tools` 不是 Claude Code 的规范字段；name 不能含 claude）。
 
 ---
 
@@ -153,6 +158,11 @@ SKILL.md 正文不超 500 行。细节放参考文件，SKILL.md 直接指向它
 
 ## 出处
 
+- 信息源清单（改 skill 前核对用）：本仓库 `skill-dev-sources.md`
+- Agent Skills 规范 https://agentskills.io/specification
+- Claude Platform《Agent Skills overview》 https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview
+- Anthropic《Equipping agents for the real world with Agent Skills》 https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills
+- anthropics/skills 官方示例仓库 https://github.com/anthropics/skills
 - Claude Platform《Skill authoring best practices》 https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
 - Anthropic《Building effective agents》 https://www.anthropic.com/engineering/building-effective-agents
 - Anthropic《Effective context engineering for AI agents》 https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents
@@ -173,3 +183,4 @@ SKILL.md 正文不超 500 行。细节放参考文件，SKILL.md 直接指向它
 - v1.3 2026-10-11：第 11 条补"讨论设计时就开分支"：一个功能从讨论开始就在 `feat/` 分支上，规格、代码、验收记录一起合并；零碎文档走短的 `docs/` 分支；合并后删分支。条数不变。起因：claude-blog 的规格在讨论阶段就提交到 main，main 上出现"计划了但没做"的规格（a01、a08）。联网核对 GitHub 文档《GitHub flow》，方向一致。
 - v1.4 2026-10-11：加第 14 条"拿出方案前先自检，结果和方案一起给"（归"动手之前"，编号不重排）。起因：claude-blog a08 增量单方案给出后，被要求自检一次就冒出 4 个问题（漏了已定的痛点来源、证据可张冠李戴、形式缺一种、可以零增量），问题在"先给后查"的顺序。
 - v1.5 2026-10-15：第 14 条改为自检只把"对照依据"写进方案，其余发现了会改变方案的问题才写一句；第 11 条的逐行改动只记进改动日志，回答里一句话说明；"怎么用这份文件"加合并前复盘。条数不变。起因：回答里堆 6 项自检和逐行改动表，看不懂；回答格式和经验沉淀另写成 `collaboration.md`，所有项目通用。
+- v1.6 2026-10-17：加第 15 条"改 skill 先查信息源"（归"动手之前"，编号不重排），新建 `skill-dev-sources.md` 列 10 个官方来源、改动类型对应表和核对流程。起因：Kai 学 skill 底层知识时要求固定信息源，并要求以后每次改 skill 都先去核对最佳实践。当天逐一打开核对了全部网址。
